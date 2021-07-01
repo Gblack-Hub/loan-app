@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Loan App</title>
+	<link rel="stylesheet" type="text/css" href="/bootstrap-4/css/bootstrap.min.css" />
+</head>
+<body>
+	<header class="mb-5">
+		<% include partials/navbar.ejs %>
+	</header>
+	<main class="container-fluid">
+		<table class="table table-striped table-responsive-md">
+			<thead>
+				<tr>
+					<th>SN</th>
+					<th>Loan Amount</th>
+					<th>Initiator</th>
+					<th>Amount Requested</th>
+					<th>Status</th>
+					<th>Date Updated</th>
+				</tr>
+			</thead>
+			<tbody>
+				<% for(let i=0; i < loans.length; i++){ %>
+				<tr>
+					<td><%= loans[i] %></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+					<td></td>
+				</tr>
+				<% } %>
+			</tbody>
+		</table>
+	</main>
+
+	<script type="text/javascript" src="/bootstrap-4/js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="/bootstrap-4/js/popper.js"></script>
+	<script type="text/javascript" src="/bootstrap-4/js/bootstrap.js"></script>
+</body>
+</html
