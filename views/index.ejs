@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Loan App</title>
+	<link rel="stylesheet" type="text/css" href="/bootstrap-4/css/bootstrap.min.css" />
+</head>
+<body>
+	<header class="mb-5">
+		<% include partials/navbar.ejs %>
+	</header>
+	<main class="container-fluid">
+		<div class="row">
+			<div class="col-sm-12 col-md-4 col-lg-3 col-xl-4">
+				<a href="/loans">View Loans</a>
+			</div>
+		</div>
+		<div class="row">
+			<div class="col-sm-12 col-md-12 col-lg-3 col-xl-4"></div>
+			<div class="col-sm-12 col-md-12 col-lg-6 col-xl-4">
+				<h2>Loan App</h2>
+				<div>Enter your loan amount:</div>
+				<form method="POST" action="/">
+					<div class="form-group">
+						<input type="text" class="form-control" />
+					</div>
+					<div class="text-center">
+						<button class="btn btn-primary">Request Loan</button>
+					</div>
+				</form>
+			</div>
+			<div class="col-sm-12 col-md-12 col-lg-3 col-xl-4"></div>
+		</div>
+	</main>
+
+	<script type="text/javascript" src="/bootstrap-4/js/jquery-3.2.1.min.js"></script>
+	<script type="text/javascript" src="/bootstrap-4/js/popper.js"></script>
+	<script type="text/javascript" src="/bootstrap-4/js/bootstrap.js"></script>
+</body>
+</html

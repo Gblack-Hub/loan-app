@@ -8,6 +8,23 @@ const init_response = {
   data: null,
 };
 
+let handleResultDisplay = (result) => {
+  init_response = {
+    error: false,
+    message: "success",
+    data: result,
+  };
+  res.status(200).send(response);
+};
+let handleError = (result) => {
+  init_response = {
+    error: true,
+    message: err.message,
+    data: null,
+  };
+  res.status(500).send(response);
+};
+
 let loans = {
   addLoan: async (req, res) => {
     if (!req.body.amount_requested || req.body.amount_requested < 1000) {
@@ -16,7 +33,7 @@ let loans = {
       });
       return;
     }
-    let response = init_response;
+
     try {
       let { amount_requested } = req.body;
       let loanData = new Loan({
@@ -25,89 +42,67 @@ let loans = {
 
       const result = await loanData.save();
 
-      response = {
-        error: false,
-        message: "success",
-        data: result,
-      };
-      res.status(200).send(response);
+      handleResultDisplay(result);
     } catch (err) {
-      response = {
-        error: true,
-        message: err.message,
-        data: null,
-      };
-      res.status(500).send(response);
+      handleError(err);
     }
   },
-
   getLoans: async (req, res) => {
-    let response = init_response;
     try {
-      // const result = await Order.find().select('order_number product').populate('product').exec()
-      const result = await Loan.find().select("loan_number product").exec();
-      response = {
-        error: false,
-        message: "success",
-        data: res.status(200).send(result),
-      };
-      res.send(result);
+      // const result = await Loan.find({}).select("loan_number product").exec();
+      const result = await Loan.find({});
+      handleResultDisplay(result);
     } catch (err) {
-      response.error = true;
-      res.status(500).send(err);
+      handleError(err);
     }
   },
   getOneLoan: async (req, res) => {
-    // let response = init_response;
+    // const { id } = req.params;
     // try {
     // 	if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
     // 		const token = req.header('Authorization').replace('Bearer ', '')
     // 		const user = jwt.verify(token, process.env.JWT_KEY)
-    // 		const result = await User.findById(user._id).exec()
-    // 		response = {
-    // 			error: false,
-    // 			message: 'success',
-    // 			data: res.status(200).send(result)
-    // 		}
+    // 		const result = await Loan.findById(id).exec()
+    // 		handleSuccess(result);
     // 	} else {
     // 		response.sendStatus(403); //forbidden
     // 	}
     // } catch(err) {
-    // 	response.error = true;
-    // 	res.status(500).send(err);
+    // 	handleError(err);
     // }
-    res.send("read one order works");
   },
   updateLoan: async (req, res) => {
-    // let response = init_response;
-    // try {
-    // 	const result = await User.findById(req.params.id).exec();
-    // 	response = {
-    // 		error: false,
-    // 		data: res.status(200).send(result),
-    // 	}
-    // } catch(err) {
-    // 	response.error = true;
-    // 	res.status(500).send(err);
-    // }
-    res.send("update order works");
+    const { id } = req.params;
+
+    if (!req.body) {
+      return res.status(400).send({ message: "Data to update not provided" });
+    }
+
+    try {
+      const result = await Loan.findByIdAndUpdate(id, req.body, {
+        useFindAndModify: false,
+      }).exec();
+      if (!result) {
+        res.status(404).send({ message: `Loan with id ${id} not found` });
+      } else {
+        result = "updated successfully";
+        handleResultDisplay(result);
+      }
+    } catch (err) {
+      handleError(err);
+    }
   },
   deleteLoan: async (req, res) => {
-    // let response = init_response;
-    // try {
-    // 	let { user_id } = req.params;
-    // 	// const result = await User.findById(req.params.id).exec();
-    // 	await Users.deleteOne({ _id: ObjectId(user_id) })
-    // 	// res.redirect('/?m=deleted')
-    // 	response = {
-    // 		error: false,
-    // 		data: res.status(200).send('deleted')
-    // 	}
-    // } catch(err) {
-    // 	response.error = true;
-    // 	res.status(500).send(err);
-    // }
-    res.send("delete order works");
+    try {
+      let { id } = req.params;
+      let result = await User.findById(id).exec();
+      await Users.deleteOne({ _id: ObjectId(id) });
+      // res.redirect('/?m=deleted')
+      result = "deleted";
+      handleResultDisplay(result);
+    } catch (err) {
+      handleError(err);
+    }
   },
 };
 
