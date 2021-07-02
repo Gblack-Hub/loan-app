@@ -50,8 +50,7 @@ let loans = {
   },
   getLoans: async (req, res) => {
     try {
-      // const result = await Loan.find({}).select("loan_number product").exec();
-      const result = await Loan.find({});
+      const result = await Loan.find({}).exec();
       let message = "All loan records available";
       handleResultDisplay(result, res, message);
     } catch (err) {
