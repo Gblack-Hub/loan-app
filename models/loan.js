@@ -5,7 +5,7 @@ const Mongoose = require("mongoose");
 const loan_schema = new Mongoose.Schema(
   {
     amount_requested: { type: Number, required: true },
-    initiator: { type: String, required: true },
+    owner: { type: String, required: true },
     loan_status: { type: String, default: "pending", required: true },
   },
   { timestamps: true }

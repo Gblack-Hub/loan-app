@@ -73,6 +73,64 @@ let loans = {
       handleError(err, res, message);
     }
   },
+  updateLoan: async (req, res) => {
+    const { id } = req.params;
+
+    if (!req.body) {
+      return res.status(400).send({ message: "Data to update not provided" });
+    }
+
+    try {
+      let result = await Loan.findByIdAndUpdate(id, req.body, {
+        useFindAndModify: false,
+      }).exec();
+      if (!result) {
+        res.status(404).send({ message: `Loan with id ${id} not found` });
+      } else {
+        let message = "Loan data updated successfully";
+        handleResultDisplay(result, res, message);
+      }
+    } catch (err) {
+      handleError(err, res);
+    }
+  },
+  updateLoanStatus: async (req, res) => {
+    const { id } = req.params;
+    const { loan_status } = req.body;
+
+    let loan_statuses = [
+      "accepted",
+      "pending",
+      "reviewing",
+      "rejected",
+      "disbursed",
+    ];
+    let invalidStatus = loan_statuses.some((item) => {
+      return item === loan_status;
+    });
+
+    if (!invalidStatus) {
+      return res.status(400).send({ message: "Selected status is not valid" });
+    }
+
+    if (!req.body.loan_status) {
+      return res.status(400).send({ message: "Select a loan status" });
+    }
+
+    try {
+      let result = await Loan.findByIdAndUpdate(id, req.body, {
+        useFindAndModify: false,
+      }).exec();
+      if (!result) {
+        res.status(404).send({ message: `Loan with id ${id} not found` });
+      } else {
+        let message = "Loan data updated successfully";
+        handleResultDisplay(result, res, message);
+      }
+    } catch (err) {
+      handleError(err, res);
+    }
+  },
 };
 
 module.exports = loans;
