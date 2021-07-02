@@ -2,22 +2,22 @@
 const Loan = require("../models/loan");
 // const jwt = require('jsonwebtoken')
 
-const init_response = {
+let response = {
   error: null,
   message: null,
   data: null,
 };
 
-let handleResultDisplay = (result) => {
-  init_response = {
+let handleResultDisplay = (result, res, message) => {
+  response = {
     error: false,
-    message: "success",
+    message: message,
     data: result,
   };
   res.status(200).send(response);
 };
-let handleError = (result) => {
-  init_response = {
+let handleError = (err, res) => {
+  response = {
     error: true,
     message: err.message,
     data: null,
@@ -35,41 +35,44 @@ let loans = {
     }
 
     try {
-      let { amount_requested } = req.body;
+      let { amount_requested, initiator } = req.body;
       let loanData = new Loan({
-        amount_requested: amount_requested,
+        amount_requested,
+        initiator,
       });
 
       const result = await loanData.save();
-
-      handleResultDisplay(result);
+      let message = "Loan request created successfully";
+      handleResultDisplay(result, res, message);
     } catch (err) {
-      handleError(err);
+      handleError(err, res);
     }
   },
   getLoans: async (req, res) => {
     try {
       // const result = await Loan.find({}).select("loan_number product").exec();
       const result = await Loan.find({});
-      handleResultDisplay(result);
+      let message = "All loan records available";
+      handleResultDisplay(result, res, message);
     } catch (err) {
-      handleError(err);
+      handleError(err, res);
     }
   },
   getOneLoan: async (req, res) => {
-    // const { id } = req.params;
-    // try {
-    // 	if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-    // 		const token = req.header('Authorization').replace('Bearer ', '')
-    // 		const user = jwt.verify(token, process.env.JWT_KEY)
-    // 		const result = await Loan.findById(id).exec()
-    // 		handleSuccess(result);
-    // 	} else {
-    // 		response.sendStatus(403); //forbidden
-    // 	}
-    // } catch(err) {
-    // 	handleError(err);
-    // }
+    const { id } = req.params;
+    try {
+      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
+      // const token = req.header('Authorization').replace('Bearer ', '')
+      // const user = jwt.verify(token, process.env.JWT_KEY)
+      const result = await Loan.findById(id).exec();
+      let message = "Loan data fetched successfully";
+      handleResultDisplay(result, res);
+      // } else {
+      // 	response.sendStatus(403); //forbidden
+      // }
+    } catch (err) {
+      handleError(err, res, message);
+    }
   },
   updateLoan: async (req, res) => {
     const { id } = req.params;
@@ -79,29 +82,17 @@ let loans = {
     }
 
     try {
-      const result = await Loan.findByIdAndUpdate(id, req.body, {
+      let result = await Loan.findByIdAndUpdate(id, req.body, {
         useFindAndModify: false,
       }).exec();
       if (!result) {
         res.status(404).send({ message: `Loan with id ${id} not found` });
       } else {
-        result = "updated successfully";
-        handleResultDisplay(result);
+        let message = "Loan data updated successfully";
+        handleResultDisplay(result, res, message);
       }
     } catch (err) {
-      handleError(err);
-    }
-  },
-  deleteLoan: async (req, res) => {
-    try {
-      let { id } = req.params;
-      let result = await User.findById(id).exec();
-      await Users.deleteOne({ _id: ObjectId(id) });
-      // res.redirect('/?m=deleted')
-      result = "deleted";
-      handleResultDisplay(result);
-    } catch (err) {
-      handleError(err);
+      handleError(err, res);
     }
   },
 };
