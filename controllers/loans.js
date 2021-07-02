@@ -11,9 +11,9 @@ const init_response = {
 let loans = {
   addLoan: async (req, res) => {
     if (!req.body.amount_requested || req.body.amount_requested < 1000) {
-      res
-        .status(400)
-        .send({ message: "Loan amount cannot be empty or less than N1,000" });
+      res.status(400).send({
+        message: "Loan amount cannot be empty or less than &#8358;1,000",
+      });
       return;
     }
     let response = init_response;
