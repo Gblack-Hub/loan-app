@@ -5,7 +5,7 @@
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
 	<meta http-equiv="X-UA-Compatible" content="ie=edge">
 	<link rel="stylesheet" type="text/css" href="/bootstrap-4/css/bootstrap.min.css" />
-	<title>Loan App</title>
+	<title>Loan App | Login</title>
 </head>
 <body>
 	<%- include ("./partials/navbar.ejs") %>
@@ -15,13 +15,16 @@
 			<div class="col-sm-12 col-md-6 col-lg-6 col-xl-4 text-center" style="margin-top: 7rem;">
 				<div class="card">
 					<div class="card-body">
-						<h1 class="text-uppercase mb-4">Loan App</h1>
-						<form method="POST" action="/loan/create">
+						<h1 class="text-uppercase mb-4">Sign In</h1>
+						<form method="POST" action="/loan/login">
 							<div class="form-group">
-								<input type="number" class="form-control" placeholder="Enter loan amount" />
+								<input type="text" class="form-control" placeholder="username" />
+							</div>
+							<div class="form-group">
+								<input type="password" class="form-control" placeholder="password" />
 							</div>
 							<div class="text-center">
-								<button class="btn btn-primary btn-block">Request Loan</button>
+								<button class="btn btn-primary btn-block">Sign In</button>
 							</div>
 						</form>
 					</div>

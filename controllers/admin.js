@@ -75,7 +75,6 @@ let loans = {
   },
   updateLoan: async (req, res) => {
     const { id } = req.params;
-
     if (!req.body) {
       return res.status(400).send({ message: "Data to update not provided" });
     }

@@ -16,6 +16,7 @@ const auth = async (req, res, err) => {
 			// req.token = token
 			next()
 		} else {
+			// res.redirect('/');
 			response.status(403).send(err); //forbidden
 		}
 	} catch(err) {

@@ -1,4 +1,5 @@
 "use strict";
+const User = require("../models/user");
 const Loan = require("../models/loan");
 // const jwt = require('jsonwebtoken')
 
@@ -6,6 +7,7 @@ let response = {
   error: null,
   message: null,
   data: null,
+  token: null
 };
 
 let handleResultDisplay = (result, res, message) => {
@@ -26,6 +28,36 @@ let handleError = (err, res) => {
 };
 
 let loans = {
+  signUp: async (req, res) => {
+    try {
+      let { user_name, password } = req.body;
+      let userData = new User ({
+        user_name: user_name,
+        password: password,
+      });
+      const result = await userData.save();
+      let message = "You have successfully signed up";
+      handleResultDisplay(result, res, message);
+    } catch(err) {
+      handleError(err, res);
+    }
+  },
+
+  login: async (req, res) => {
+    try {
+      let { user_name, password } = req.body;
+      const result = await User.findByDetails(user_name, password)
+      if(!result){
+        res.status(401).send({ error: "Login failed, check your login details" });
+      }
+      const token = jwt.sign({ _id: result._id }, jwtkey);
+      let message = "Login successful";
+      handleResultDisplay(result, res, message);
+    } catch(err) {
+      res.status(500).send(err);
+    }
+  },
+
   addLoan: async (req, res) => {
     if (!req.body.amount_requested || req.body.amount_requested < 1000) {
       res.status(400).send({
@@ -48,46 +80,12 @@ let loans = {
       handleError(err, res);
     }
   },
+  
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
       let message = "All loan records available";
       handleResultDisplay(result, res, message);
-    } catch (err) {
-      handleError(err, res);
-    }
-  },
-  getOneLoan: async (req, res) => {
-    const { id } = req.params;
-    try {
-      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-      // const token = req.header('Authorization').replace('Bearer ', '')
-      // const user = jwt.verify(token, process.env.JWT_KEY)
-      const result = await Loan.findById(id).exec();
-      let message = "Loan data fetched successfully";
-      handleResultDisplay(result, res, message);
-      // } else {
-      // 	response.sendStatus(403); //forbidden
-      // }
-    } catch (err) {
-      handleError(err, res);
-    }
-  },
-  repayLoan: async (req, res) => {
-    const { id } = req.params;
-    try {
-      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-      // const token = req.header('Authorization').replace('Bearer ', '')
-      // const user = jwt.verify(token, process.env.JWT_KEY)
-      const result = await Loan.findById(id).exec();
-      if(result.loan_status !== "disbursed"){
-        return res.status(400).send({ message: "You can only repay a disbursed loan." });
-      }
-      let message = "Loan repayment was successful";
-      handleResultDisplay(result, res, message);
-      // } else {
-      //  response.sendStatus(403); //forbidden
-      // }
     } catch (err) {
       handleError(err, res);
     }

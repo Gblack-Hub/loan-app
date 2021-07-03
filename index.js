@@ -15,7 +15,7 @@ const port = process.env.PORT;
 const app = express();
 
 //database connection
-require("./config/db/db");
+// require("./config/db/db");
 
 // const { initializePayment, verifyPayment } =
 //   require("./config/paystack")(axios);
@@ -27,6 +27,21 @@ app.set("view engine", ejs);
 
 app.get("/", function (req, res) {
   res.render("index.ejs");
+});
+
+app.get("/admin", function (req, res) {
+  let data = [
+    { id: "jksjk6wsd77as6dfa", amount_requested: 20000, owner: "Abiodun", status: "pending" },
+    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Abbey", status: "accepted" },
+    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Olu", status: "reviewing" },
+    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ade", status: "rejected" },
+    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ifeoluwa", status: "disbursed" },
+  ]
+  res.render("loans.ejs", {data: data});
+});
+
+app.put("/admin/loan/update/:id", function (req, res) {
+  res.send(req.params);
 });
 
 // paystack.customer
