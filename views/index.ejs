@@ -8,7 +8,7 @@
 	<title>Loan App</title>
 </head>
 <body>
-	<%- include ("./partials/navbar.ejs") %>
+	<%- include ("./partials/navbar") %>
 	<main class="container">
 		<div class="row mt-5">
 			<div class="col-sm-12 col-md-3 col-lg-3 col-xl-4"></div>
@@ -16,9 +16,19 @@
 				<div class="card">
 					<div class="card-body">
 						<h1 class="text-uppercase mb-4">Loan App</h1>
-						<form method="POST" action="/loan/create">
+						<% if(data.error){ %>
+						<div class="alert alert-danger">
+							<%= data.message %>
+						</div>
+						<% } else if(data.error === false) { %>
+						<div class="alert alert-success">
+							<%= data.message %>
+						</div>
+						<% } %>
+						<form method="POST" action="/user/create-loan">
 							<div class="form-group">
-								<input type="number" class="form-control" placeholder="Enter loan amount" />
+								<input type="number" class="form-control" name="amount_requested" placeholder="Enter loan amount" />
+								<input type="hidden" class="form-control" name="owner" value="Ade" placeholder="Owner" />
 							</div>
 							<div class="text-center">
 								<button class="btn btn-primary btn-block">Request Loan</button>

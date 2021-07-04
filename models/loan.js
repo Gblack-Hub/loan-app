@@ -5,6 +5,7 @@ const Mongoose = require("mongoose");
 const loan_schema = new Mongoose.Schema(
   {
     amount_requested: { type: Number, required: true },
+    isRepaid: { type: Boolean, default: false, required: true },
     owner: { type: String, required: true },
     loan_status: { type: String, default: "pending", required: true },
   },

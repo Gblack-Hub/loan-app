@@ -73,25 +73,6 @@ let loans = {
       handleError(err, res);
     }
   },
-  repayLoan: async (req, res) => {
-    const { id } = req.params;
-    try {
-      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-      // const token = req.header('Authorization').replace('Bearer ', '')
-      // const user = jwt.verify(token, process.env.JWT_KEY)
-      const result = await Loan.findById(id).exec();
-      if(result.loan_status !== "disbursed"){
-        return res.status(400).send({ message: "You can only repay a disbursed loan." });
-      }
-      let message = "Loan repayment was successful";
-      handleResultDisplay(result, res, message);
-      // } else {
-      //  response.sendStatus(403); //forbidden
-      // }
-    } catch (err) {
-      handleError(err, res);
-    }
-  },
 };
 
 module.exports = loans;

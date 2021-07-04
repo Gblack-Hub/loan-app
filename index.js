@@ -4,18 +4,18 @@ require("dotenv").config();
 
 const express = require("express");
 // const axios = require("axios");
-const ejs = require("ejs");
-// const _ = require("lodash");
 const path = require("path");
 const loansRoute = require("./routes/loans");
 const adminRoute = require("./routes/admin");
+const usersRoute = require("./routes/users");
+const auth_checker = require("./middlewares/auth_checker");
 const paystack = require("paystack-api")(process.env.PAYSTACK_SECRET_KEY);
 const port = process.env.PORT;
 
 const app = express();
 
 //database connection
-// require("./config/db/db");
+require("./config/db/db");
 
 // const { initializePayment, verifyPayment } =
 //   require("./config/paystack")(axios);
@@ -23,26 +23,39 @@ const app = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(express.static(path.join(__dirname, "public/")));
-app.set("view engine", ejs);
+app.set("view engine", "ejs");
+
+// app.use(function (req, res, next) {
+//   if (req.session.user == null) {
+//     res.redirect("/user/signup");
+//   } else {
+//     next();
+//   }
+// });
 
 app.get("/", function (req, res) {
-  res.render("index.ejs");
+  let data = {
+    error: null,
+    data: null,
+    message: "success",
+  };
+  return res.status(200).render("index", { data: data });
 });
 
-app.get("/admin", function (req, res) {
-  let data = [
-    { id: "jksjk6wsd77as6dfa", amount_requested: 20000, owner: "Abiodun", status: "pending" },
-    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Abbey", status: "accepted" },
-    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Olu", status: "reviewing" },
-    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ade", status: "rejected" },
-    { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ifeoluwa", status: "disbursed" },
-  ]
-  res.render("loans.ejs", {data: data});
-});
+// app.get("/admin", function (req, res) {
+//   let data = [
+//     { id: "jksjk6wsd77as6dfa", amount_requested: 20000, owner: "Abiodun", status: "pending" },
+//     { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Abbey", status: "accepted" },
+//     { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Olu", status: "reviewing" },
+//     { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ade", status: "rejected" },
+//     { id: "jksjk6wsd77as6dfa", amount_requested: 10000, owner: "Ifeoluwa", status: "disbursed" },
+//   ]
+//   res.render("loans.ejs", {data: data});
+// });
 
-app.put("/admin/loan/update/:id", function (req, res) {
-  res.send(req.params);
-});
+// app.put("/admin/loan/update/:id", function (req, res) {
+//   res.send(req.params);
+// });
 
 // paystack.customer
 //   .list()
@@ -106,6 +119,7 @@ app.use("/loan", loansRoute);
 
 //private route
 app.use("/admin", adminRoute);
+app.use("/user", usersRoute);
 
 app.listen(port, (err) => {
   if (err) console.log(err);

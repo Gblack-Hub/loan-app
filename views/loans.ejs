@@ -1,98 +1,115 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
 	<meta charset="UTF-8">
 	<title>Loan App</title>
 	<link rel="stylesheet" type="text/css" href="/bootstrap-4/css/bootstrap.min.css" />
 </head>
+
 <body>
 	<%- include ("./partials/navbar.ejs") %>
-	<main class="container">
-		<div class="row">
-			<div class="col-sm-12 col-md-12 col-lg-12 col-xl-2"></div>
-			<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8">
-				<h4 class="text-center my-3">Loans</h4>
-				<table class="table table-striped table-bordered table-responsive-md">
-					<thead>
-						<tr>
-							<th>SN</th>
-							<th>Amount Requested</th>
-							<th>Owner</th>
-							<th>Status</th>
-							<th>Options</th>
-						</tr>
-					</thead>
-					<tbody>
-						<% data.map((item, index) => { %>
-						<tr>
-							<td><%= index+1 %></td>
-							<td>&#8358;<%= item.amount_requested.toLocaleString() %></td>
-							<td><%= item.owner %></td>
-							<td>
-								<% if (item.status === "pending") { %>
-									<span class="badge badge-warning">Pending</span> 
-								<% } else if (item.status === "accepted") { %>
-									<span class="badge badge-primary">Accepted</span> 
-								<% } else if (item.status === "reviewing") { %>
-									<span class="badge badge-secondary">Reviewing</span> 
-								<% } else if (item.status === "rejected") { %>
-									<span class="badge badge-danger">Rejected</span> 
-								<% } else if (item.status === "disbursed") { %>
-									<span class="badge badge-success">Disbursed</span> 
-								<% } %>
-							</td>
-							<td>
-								<!-- <form method="POST" action="/admin/loan/update/<%=item.id%>"> -->
-									<div class="dropdown">
-									  <button type="button" class="btn btn-primary btn-sm dropdown-toggle" data-toggle="dropdown">
-									    Update Status
-									  </button>
-									  <div class="dropdown-menu dropdown-menu-right">
-									    <button type="submit" name="loan_status" value="pending" class="dropdown-item">Pend</button>
-									    <button class="dropdown-item" onclick="updateLoanStatus('<%= item.id %>', 'pending')">Pend</button>
-									    <button class="dropdown-item" onclick="updateLoanStatus('<%= item.id %>', 'accepted')">Accept</button>
-									    <button class="dropdown-item" onclick="updateLoanStatus('<%= item.id %>', 'reviewing')">Review</button>
-									    <button class="dropdown-item" onclick="updateLoanStatus('<%= item.id %>', 'rejected')" href="#">Reject</button>
-									    <button class="dropdown-item" onclick="updateLoanStatus('<%= item.id %>', 'disbursed')">Disburse</button>
-									  </div>
-									</div>
-								<!-- </form> -->
-							</td>
-						</tr>
-						<% }) %>
-					</tbody>
-				</table>
+		<main class="container">
+			<div class="row">
+				<div class="col-sm-12 col-md-12 col-lg-12 col-xl-2"></div>
+				<div class="col-sm-12 col-md-12 col-lg-12 col-xl-8">
+					<h4 class="text-center my-3">My Loans</h4>
+					
+					<div class="text-center mb-3" id="feedback"></div>
+					
+					<table class="table table-striped table-bordered table-responsive-md">
+						<thead>
+							<tr>
+								<th>SN</th>
+								<th>Amount Requested</th>
+								<th>Owner</th>
+								<th>Status</th>
+								<th>Payment Status</th>
+								<th>Options</th>
+							</tr>
+						</thead>
+						<tbody>
+							<% if(data.length> 0) { %>
+							<% data.map((item, index)=> { %>
+								<tr>
+									<td>
+										<%= index+1 %>
+									</td>
+									<td>&#8358;<%= item.amount_requested.toLocaleString() %>
+									</td>
+									<td>
+										<%= item.owner %>
+									</td>
+									<td>
+										<% if (item.loan_status==="pending" ) { %>
+											<span class="badge badge-warning">Pending</span>
+										<% } else if (item.loan_status==="accepted" ) { %>
+											<span class="badge badge-primary">Accepted</span>
+										<% } else if (item.loan_status==="reviewing" ) { %>
+											<span class="badge badge-secondary">Reviewing</span>
+										<% } else if (item.loan_status==="rejected" ) { %>
+											<span class="badge badge-danger">Rejected</span>
+										<% } else if (item.loan_status==="disbursed" ) { %>
+											<span class="badge badge-success">Disbursed</span>
+										<% } %>
+									</td>
+									<td>
+										<% if (item.isRepaid===false ) { %>
+											<span class="text-danger">Not Paid</span>
+										<% } else if (item.isRepaid===true ) { %>
+											<span class="text-success">Paid</span>
+										<% } else { %>
+											<span>None</span>
+										<% } %>
+									</td>
+									<td>
+										<!-- <form method="POST" action="/admin/loan/update/<%=item.id%>"> -->
+										<% if (item.isRepaid===false ) { %>
+										<button type="button" class="btn btn-primary btn-sm" onclick="repayLoan('<%= item.id %>')">
+											Repay
+										</button>
+										<% } %>
+										<!-- </form> -->
+									</td>
+								</tr>
+							<% }) %>
+							<% } else { %>
+								<tr>
+									<td colspan="6" class="text-center">You have no Loans yet</td>
+								</tr>
+							<% } %>
+						</tbody>
+					</table>
+				</div>
+				<div class="col-sm-12 col-md-12 col-lg-12 col-xl-2"></div>
 			</div>
-			<div class="col-sm-12 col-md-12 col-lg-12 col-xl-2"></div>
-		</div>
-		
-	</main>
 
-	<script type="text/javascript" src="/bootstrap-4/js/jquery-3.2.1.min.js"></script>
-	<script type="text/javascript" src="/bootstrap-4/js/popper.js"></script>
-	<script type="text/javascript" src="/bootstrap-4/js/bootstrap.js"></script>
-	<script type="text/javascript">
-		function updateLoanStatus(id, status) {
-		    fetch(`http://localhost:9000/admin/loan/update/${id}`, {
-		        method: "PUT",
-		        body: JSON.stringify({ loan_status: status }),
-		        headers: {"Content-Type": "application/json"}
-		    })
-        .then(response => {
-            if (!response.ok) {
-                throw new Error("Network response was not ok");
-            }
-            console.log(response);
-            console.log(response.json());
-        })
-        .catch(error => {
-            console.error(
-                "Error while fetching",
-                error
-            );
-            console.log(error);
-        });
-		}
-	</script>
+		</main>
+
+		<script type="text/javascript" src="/bootstrap-4/js/jquery-3.2.1.min.js"></script>
+		<script type="text/javascript" src="/bootstrap-4/js/popper.js"></script>
+		<script type="text/javascript" src="/bootstrap-4/js/bootstrap.js"></script>
+		<script type="text/javascript">
+			function repayLoan(id) {
+				$.ajax({
+					url: `http://localhost:9000/user/repay/${id}`,
+					method: "PUT",
+					contentType: 'application/json',
+					success: function(res) {
+						console.log(res)
+						if(res.error){
+							document.getElementById("feedback").innerHTML = `<span class="alert alert-danger">${res.message}</span>`
+						} else {
+							document.getElementById("feedback").innerHTML = `<span class="alert alert-success">${res.message}</span>`
+						}
+						window.location.reload(true); 
+					},
+					error: function (req, msg, err) {
+						console.log(req, msg, err)
+					}
+				});
+			}
+		</script>
 </body>
-</html
+
+</html>

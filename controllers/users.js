@@ -1,13 +1,14 @@
 "use strict";
 const User = require("../models/user");
 const Loan = require("../models/loan");
+const bcrypt = require("bcryptjs");
 // const jwt = require('jsonwebtoken')
 
 let response = {
   error: null,
   message: null,
   data: null,
-  token: null
+  token: null,
 };
 
 let handleResultDisplay = (result, res, message) => {
@@ -16,8 +17,9 @@ let handleResultDisplay = (result, res, message) => {
     message: message,
     data: result,
   };
-  res.status(200).send(response);
+  return res.status(200).send(response);
 };
+
 let handleError = (err, res) => {
   response = {
     error: true,
@@ -25,45 +27,94 @@ let handleError = (err, res) => {
     data: null,
   };
   res.status(500).send(response);
+  return;
 };
 
 let loans = {
   signUp: async (req, res) => {
     try {
       let { user_name, password } = req.body;
-      let userData = new User ({
+      let checkRecord = await User.find({ user_name: user_name });
+      if (checkRecord.length > 0) {
+        let data = {
+          error: true,
+          data: null,
+          message: "Username already taken.",
+        };
+        return res.status(401).render("signup", { data: data });
+      }
+      let userData = new User({
         user_name: user_name,
         password: password,
       });
       const result = await userData.save();
-      let message = "You have successfully signed up";
-      handleResultDisplay(result, res, message);
-    } catch(err) {
-      handleError(err, res);
+      let message = "You have successfully signed up, login to continue";
+      // let data = { error: false, data: result, message: message };
+      res.redirect("/");
+    } catch (err) {
+      res.render("signup", { data: "Sign Up error" });
+    }
+  },
+
+  getSignUpPage: (req, res) => {
+    try {
+      let data = {
+        error: false,
+        data: null,
+        message: "success",
+      };
+      res.render("signup", { data: data });
+    } catch (err) {
+      res.status(500).send(err);
+    }
+  },
+
+  getLoginPage: (req, res) => {
+    try {
+      let data = {
+        error: false,
+        data: null,
+        message: "success",
+      };
+      res.render("login", { data: data });
+    } catch (err) {
+      res.status(500).send(err);
     }
   },
 
   login: async (req, res) => {
     try {
       let { user_name, password } = req.body;
-      const result = await User.findByDetails(user_name, password)
-      if(!result){
-        res.status(401).send({ error: "Login failed, check your login details" });
+      let pass = await bcrypt.hash(password, 8);
+      const result = await User.find({
+        user_name: user_name,
+        password: pass,
+      });
+      console.log(result);
+      if (result.length > 0) {
+        let data = {
+          error: true,
+          data: null,
+          message: "Login failed, check your login details",
+        };
+        return res.status(401).render("login", { data: data });
       }
-      const token = jwt.sign({ _id: result._id }, jwtkey);
+      // const token = jwt.sign({ _id: result._id }, jwtkey);
       let message = "Login successful";
-      handleResultDisplay(result, res, message);
-    } catch(err) {
+      res.redirect("/");
+    } catch (err) {
       res.status(500).send(err);
     }
   },
 
   addLoan: async (req, res) => {
     if (!req.body.amount_requested || req.body.amount_requested < 1000) {
-      res.status(400).send({
-        message: "Loan amount cannot be empty or less than &#8358;1,000",
-      });
-      return;
+      let data = {
+        error: true,
+        data: null,
+        message: "Loan amount cannot be empty or less than N1,000",
+      };
+      return res.status(401).render("index", { data: data });
     }
 
     try {
@@ -74,18 +125,79 @@ let loans = {
       });
 
       const result = await loanData.save();
-      let message = "Loan request created successfully";
-      handleResultDisplay(result, res, message);
+      let data = {
+        error: false,
+        data: result,
+        message: "Loan request created successfully",
+      };
+      return res.status(200).render("index", { data: data });
     } catch (err) {
       handleError(err, res);
     }
   },
-  
+
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
       let message = "All loan records available";
+      let data = {
+        error: false,
+        data: result,
+        message: "All loan records available",
+      };
+      return res.status(200).render("loans", data);
+    } catch (err) {
+      handleError(err, res);
+    }
+  },
+
+  repayLoan: async (req, res) => {
+    const { id } = req.params;
+    try {
+      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
+      // const token = req.header('Authorization').replace('Bearer ', '')
+      // const user = jwt.verify(token, process.env.JWT_KEY)
+      const findLoan = await Loan.findById(id).exec();
+      if (!findLoan) {
+        let data = {
+          error: true,
+          data: null,
+          message: `Loan with id ${id} not found`,
+        };
+        return res.status(404).send(data);
+      }
+      if (findLoan.loan_status !== "disbursed") {
+        let data = {
+          error: true,
+          data: null,
+          message: "Only disbursed loans can be repaid.",
+        };
+        return res.status(200).send(data);
+      }
+      if (!findLoan.isRepaid) {
+        let data = {
+          error: true,
+          data: null,
+          message: "Loan is already cleared.",
+        };
+        return res.status(400).send(data);
+      }
+
+      const result = await Loan.findByIdAndUpdate(
+        id,
+        { isRepaid: true },
+        {
+          useFindAndModify: false,
+        }
+      ).exec();
+      console.log(result);
+
+      let message = "Loan repayment was successful.";
       handleResultDisplay(result, res, message);
+
+      // } else {
+      //  response.sendStatus(403); //forbidden
+      // }
     } catch (err) {
       handleError(err, res);
     }

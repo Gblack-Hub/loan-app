@@ -51,26 +51,14 @@ let loans = {
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
-      let message = "All loan records available";
-      handleResultDisplay(result, res, message);
+      let data = {
+        error: false,
+        data: result,
+        message: "All loan records available",
+      };
+      return res.status(200).render("admin", data);
     } catch (err) {
       handleError(err, res);
-    }
-  },
-  getOneLoan: async (req, res) => {
-    const { id } = req.params;
-    try {
-      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-      // const token = req.header('Authorization').replace('Bearer ', '')
-      // const user = jwt.verify(token, process.env.JWT_KEY)
-      const result = await Loan.findById(id).exec();
-      let message = "Loan data fetched successfully";
-      handleResultDisplay(result, res);
-      // } else {
-      // 	response.sendStatus(403); //forbidden
-      // }
-    } catch (err) {
-      handleError(err, res, message);
     }
   },
   updateLoan: async (req, res) => {
