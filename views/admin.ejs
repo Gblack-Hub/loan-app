@@ -20,6 +20,7 @@
                                 <th>SN</th>
                                 <th>Amount Requested</th>
                                 <th>Owner</th>
+                                <th>Email</th>
                                 <th>Status</th>
                                 <th>Payment Status</th>
                                 <th>Options</th>
@@ -37,18 +38,19 @@
                                     <td>
                                         <%= item.owner %>
                                     </td>
+                                    <td><%= item.email %></td>
                                     <td>
                                         <% if (item.loan_status==="pending" ) { %>
                                             <span class="badge badge-warning">Pending</span>
-                                            <% } else if (item.loan_status==="accepted" ) { %>
-                                                <span class="badge badge-primary">Accepted</span>
-                                                <% } else if (item.loan_status==="reviewing" ) { %>
-                                                    <span class="badge badge-secondary">Reviewing</span>
-                                                    <% } else if (item.loan_status==="rejected" ) { %>
-                                                        <span class="badge badge-danger">Rejected</span>
-                                                        <% } else if (item.loan_status==="disbursed" ) { %>
-                                                            <span class="badge badge-success">Disbursed</span>
-                                                            <% } %>
+                                        <% } else if (item.loan_status==="accepted" ) { %>
+                                            <span class="badge badge-primary">Accepted</span>
+                                        <% } else if (item.loan_status==="reviewing" ) { %>
+                                            <span class="badge badge-secondary">Reviewing</span>
+                                        <% } else if (item.loan_status==="rejected" ) { %>
+                                            <span class="badge badge-danger">Rejected</span>
+                                        <% } else if (item.loan_status==="disbursed" ) { %>
+                                            <span class="badge badge-success">Disbursed</span>
+                                        <% } %>
                                     </td>
                                     <td>
                                         <% if (item.isRepaid===false ) { %>

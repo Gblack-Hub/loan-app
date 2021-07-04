@@ -20,6 +20,7 @@
     "jsonwebtoken": "^8.5.1",
     "mongodb": "^3.6.8",
     "mongoose": "^5.13.0",
-    "paystack-api": "^2.0.6"
+    "paystack-api": "^2.0.6",
+    "validator": "^13.6.0"
   }
 }

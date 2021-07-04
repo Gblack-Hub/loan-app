@@ -22,7 +22,6 @@
 							<tr>
 								<th>SN</th>
 								<th>Amount Requested</th>
-								<th>Owner</th>
 								<th>Status</th>
 								<th>Payment Status</th>
 								<th>Options</th>
@@ -36,9 +35,6 @@
 										<%= index+1 %>
 									</td>
 									<td>&#8358;<%= item.amount_requested.toLocaleString() %>
-									</td>
-									<td>
-										<%= item.owner %>
 									</td>
 									<td>
 										<% if (item.loan_status==="pending" ) { %>
@@ -64,10 +60,11 @@
 									</td>
 									<td>
 										<!-- <form method="POST" action="/admin/loan/update/<%=item.id%>"> -->
-										<% if (item.isRepaid===false ) { %>
-										<button type="button" class="btn btn-primary btn-sm" onclick="repayLoan('<%= item.id %>')">
-											Repay
+										<% if (item.isRepaid===false && item.loan_status === "disbursed" ) { %>
+										<button type="button" class="btn btn-primary btn-sm" onclick="payWithPaystack('<%= item.id %>', '<%= item.email %>', '<%= item.amount_requested %>')">
+											Repay with paystack
 										</button>
+										
 										<% } %>
 										<!-- </form> -->
 									</td>
@@ -89,20 +86,41 @@
 		<script type="text/javascript" src="/bootstrap-4/js/jquery-3.2.1.min.js"></script>
 		<script type="text/javascript" src="/bootstrap-4/js/popper.js"></script>
 		<script type="text/javascript" src="/bootstrap-4/js/bootstrap.js"></script>
+		<script src="https://js.paystack.co/v1/inline.js"></script>
 		<script type="text/javascript">
-			function repayLoan(id) {
+			function payWithPaystack(id, email, amount) {
+				let public_key = 'pk_test_adad5f3b58dd7cb203ade1171c55d5a33c8012cc';
+				var handler = PaystackPop.setup({
+					key: public_key,
+					email: email,
+					amount: amount * 100,
+					currency: "NGN",
+					callback: function (response) {
+						// alert('success. transaction ref is ' + response.reference);
+						repayLoan(id, email, amount, response);
+					},
+					onClose: function () {
+						alert('window closed');
+					}
+				});
+				handler.openIframe();
+			}
+			function repayLoan(id, email, amount, response) {
 				$.ajax({
 					url: `http://localhost:9000/user/repay/${id}`,
 					method: "PUT",
+					data: JSON.stringify({email: email, amount: amount, response: response}),
 					contentType: 'application/json',
 					success: function(res) {
 						console.log(res)
 						if(res.error){
-							document.getElementById("feedback").innerHTML = `<span class="alert alert-danger">${res.message}</span>`
+							document.getElementById("feedback").innerHTML = `<span class="alert alert-danger">${res.message}</span>`;
+							return;
 						} else {
 							document.getElementById("feedback").innerHTML = `<span class="alert alert-success">${res.message}</span>`
+							return;
 						}
-						window.location.reload(true); 
+						window.location.reload(true);
 					},
 					error: function (req, msg, err) {
 						console.log(req, msg, err)
