@@ -4,8 +4,11 @@ const express = require("express");
 const router = express.Router();
 const admin = require("../controllers/admin");
 
-router.route("/create").post(admin.addLoan);
-router.route("/").get(admin.getLoans);
-router.route("/loan/update/:id").put(admin.updateLoanStatus);
+router.post("/register", admin.register);
+router.post("/login", admin.login);
+router.post("/loan/create", admin.addLoan);
+router.get("/loans", admin.getLoans);
+router.get("/loan/:id", admin.getOneLoan);
+router.put("/loan/update/:id", admin.updateLoanStatus);
 
 module.exports = router;

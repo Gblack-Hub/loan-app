@@ -9,7 +9,6 @@ const loan_schema = new Mongoose.Schema(
     email: {
       type: String,
       required: true,
-      unique: true,
       lowercase: true,
       validate: (value) => {
         if (!validator.isEmail(value)) {

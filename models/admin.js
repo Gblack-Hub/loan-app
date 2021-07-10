@@ -4,9 +4,9 @@ const Mongoose = require("mongoose");
 const validator = require("validator");
 const bcrypt = require("bcryptjs");
 
-const user_schema = new Mongoose.Schema(
+const admin_schema = new Mongoose.Schema(
   {
-    username: { type: String, required: true, unique: true, trim: true },
+    username: { type: String, unique: true, required: true },
     email: {
       type: String,
       required: true,
@@ -23,6 +23,5 @@ const user_schema = new Mongoose.Schema(
   { timestamps: true }
 );
 
-const User = Mongoose.model("User", user_schema);
-
-module.exports = User;
+const Admin = Mongoose.model("Admin", admin_schema);
+module.exports = Admin;
