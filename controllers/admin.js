@@ -3,56 +3,9 @@ const Loan = require("../models/loan");
 const Admin = require("../models/admin");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
+const resp = require("../utils/api-response");
 
-let response = {
-  error: null,
-  message: null,
-  data: null,
-};
 let message;
-
-const handleAuthResponse = (result, res, message, token) => {
-  response = {
-    error: false,
-    message: message,
-    data: result,
-    authorization: token,
-  };
-
-  res.status(200).send(response);
-};
-const handleResultDisplay = (result, res, message) => {
-  response = {
-    error: false,
-    message: message,
-    data: result,
-  };
-  res.status(200).send(response);
-};
-const handle400 = (res, message) => {
-  response = {
-    error: true,
-    message: message,
-    data: null,
-  };
-  res.status(400).send(response);
-};
-const handle404 = (res, message) => {
-  response = {
-    error: true,
-    message: message,
-    data: null,
-  };
-  res.status(404).send(response);
-};
-const handleError = (err, res) => {
-  response = {
-    error: true,
-    message: err.message,
-    data: null,
-  };
-  res.status(500).send(response);
-};
 
 let admin = {
   register: async (req, res) => {
@@ -60,13 +13,13 @@ let admin = {
       const { username, email, password } = req.body;
       if (!req.body) {
         message = "All field is required";
-        handle400(res, message);
+        resp.handle400(res, message);
       }
 
       const existingUser = await Admin.findOne({ email });
       if (existingUser) {
         message = `Email is already registered`;
-        handle400(res, message);
+        resp.handle400(res, message);
         return;
       }
 
