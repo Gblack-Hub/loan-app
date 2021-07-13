@@ -29,11 +29,11 @@ app.get("/", function (req, res) {
 });
 
 //public route
-app.use("/loan", loansRoute);
+app.use("/api/loan", loansRoute);
 
 //private route
-app.use("/admin", adminRoute);
-app.use("/user", usersRoute);
+app.use("/api/admin", adminRoute);
+app.use("/api/user", usersRoute);
 
 app.listen(port, (err) => {
   if (err) console.log(err);

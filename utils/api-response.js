@@ -5,60 +5,54 @@ let response = {
 };
 
 const resp = {
-  handleAuthResponse: (result, res, message, token) => {
+  authResponse: (code, res, result, message, token) => {
     response = {
       error: false,
       message: message,
       data: result,
       authorization: token,
     };
-
-    res.status(200).send(response);
+    res.status(code).send(response);
+    return;
   },
 
-  handleResultDisplay: (result, res, message) => {
+  successResponse: (code, res, result, message) => {
     response = {
       error: false,
       message: message,
       data: result,
     };
-    res.status(200).send(response);
+    res.status(code).send(response);
+    return;
   },
 
-  handleSuccessResponse: (code, res, result, message) => {
-    response = {
-      error: false,
-      message: message,
-      data: result,
-    };
-    res.status(201).send(response);
-  },
-
-  handle400: (res, message) => {
+  failedResponse: (code, res, message) => {
     response = {
       error: true,
       message: message,
       data: null,
     };
-    res.status(400).send(response);
+    res.status(code).send(response);
+    return;
   },
 
-  handle404: (res, message) => {
-    response = {
-      error: true,
-      message: message,
-      data: null,
-    };
-    res.status(404).send(response);
-  },
-
-  handleError: (err, res) => {
+  errorResponse: (code, res, err) => {
     response = {
       error: true,
       message: err.message,
       data: null,
     };
-    res.status(500).send(response);
+    res.status(code).send(response);
+    return;
+  },
+
+  incorrectRequestMethod: (methodUsed) => {
+    response = {
+      error: true,
+      message: `Method ${methodUsed} is not allowed`,
+    };
+    res.status(405).send(response);
+    return;
   },
 };
 

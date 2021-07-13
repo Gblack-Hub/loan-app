@@ -2,31 +2,30 @@
 const Loan = require("../models/loan");
 const Admin = require("../models/admin");
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
 const resp = require("../utils/api-response");
+const validations = require("../utils/validations");
+const tokenUtil = require("../utils/tokenUtil");
 
 let message;
 
 let admin = {
   register: async (req, res) => {
+    const { username, email, password } = req.body;
+
     try {
-      const { username, email, password } = req.body;
-      if (!req.body) {
-        message = "All field is required";
-        resp.handle400(res, message);
-      }
+      validations.validateAdminRegistration(req, res);
 
       const existingUser = await Admin.findOne({ email });
       if (existingUser) {
         message = `Email is already registered`;
-        resp.handle400(res, message);
-        return;
+        return resp.failedResponse(409, res, message);
       }
 
       let existingUsername = await Admin.findOne({ username });
       if (existingUsername) {
         message = `Username already taken.`;
-        return handle400(res, message);
+        resp.failedResponse(409, res, message);
+        return;
       }
 
       //Encrypt user password before saving to database
@@ -38,80 +37,59 @@ let admin = {
         password: encryptedPassword,
       });
 
-      if (!adminData) {
-        message = "Registration failed, try again";
-        handle400(res, message);
-        return;
-      }
-
       // Create token
-      const token = jwt.sign(
-        { _id: adminData._id, email },
-        process.env.JWT_KEY,
-        {
-          expiresIn: "2h",
-        }
-      );
+      const token = tokenUtil.createToken(adminData._id);
 
       // send back user details excluding password
-      const data = await Admin.findOne({ email }, { password: 0 });
+      const result = await Admin.findOne({ email }, { password: 0 });
+
       message = "Registration successful";
-      handleAuthResponse(data, res, message, token);
+      resp.authResponse(200, res, result, message, token);
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   login: async (req, res) => {
-    try {
-      const { email, password } = req.body;
-      if (!req.body) {
-        message = "All field is required";
-        handle400(res, message);
-      }
+    const { email, password } = req.body;
 
+    validations.validateAdminLogin(req);
+
+    try {
       //check if email exists
       const user = await Admin.findOne({ email });
       if (!user) {
-        message = `Email ${email} is not registered`;
-        handle400(res, message);
+        message = `Email '${email}' is not registered`;
+        resp.failedResponse(404, res, message);
         return;
       }
       //check if password matches the provided one
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {
-        let message = "Provided password does not match";
-        handle400(res, message);
+        message = "Provided password does not match";
+        resp.failedResponse(400, res, message);
         return;
       }
 
       // Create token if credentials are correct
       let token;
       if (user && isPasswordMatch) {
-        token = jwt.sign({ _id: user._id, email }, process.env.JWT_KEY, {
-          expiresIn: "2h",
-        });
+        // Create token
+        token = tokenUtil.createToken(user._id);
       }
-      // send back user details excluding password
-      const data = await Admin.findOne({ email }, { password: 0 });
 
-      let message = "Signed In successfully";
-      handleAuthResponse(data, res, message, token);
+      // send back user details excluding password
+      const result = await Admin.findOne({ email }, { password: 0 });
+
+      message = "Signed In successfully";
+      resp.authResponse(200, res, result, message, token);
     } catch (err) {
-      handleError(err, res);
+      resp.failedResponse(500, res, err);
     }
   },
   addLoan: async (req, res) => {
     let { amount_requested, owner, email } = req.body;
-    if (!email) {
-      message = "An email is required";
-      handle400(res, message);
-      return;
-    }
-    if (!amount_requested || amount_requested < 1000) {
-      message = "Loan amount cannot be empty or less than N1,000";
-      handle400(res, message);
-      return;
-    }
+
+    validations.validateAdminAddLoan(req);
 
     try {
       let loanData = new Loan({
@@ -121,22 +99,24 @@ let admin = {
       });
 
       const result = await loanData.save();
+      console.log(result);
+      
       if (result) {
         message = "Loan request created successfully";
-        handleResultDisplay(result, res, message);
+        resp.successResponse(200, res, result, message);
         return;
       }
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
       message = "Successful";
-      handleResultDisplay(result, res, message);
+      resp.successResponse(200, res, result, message);
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   getOneLoan: async (req, res) => {
@@ -148,24 +128,23 @@ let admin = {
       const result = await Loan.findById(id).exec();
       if (!result) {
         message = `Loan with id ${id} is not found`;
-        handle404(res, message);
+        resp.failedResponse(404, res, message);
         return;
       }
       message = "Loan data fetched successfully";
-      handleResultDisplay(result, res, message);
-      return;
+      resp.successResponse(200, res, result, message);
       // } else {
       // 	response.sendStatus(403); //forbidden
       // }
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   updateLoan: async (req, res) => {
     const { id } = req.params;
     if (!req.body) {
       message = "No data provided, please provide data";
-      handle400(res, message);
+      resp.failedResponse(400, res, message);
     }
 
     try {
@@ -174,41 +153,22 @@ let admin = {
       }).exec();
       if (!result) {
         message = `Loan with id ${id} not found`;
-        handle404(res, message);
+        resp.failedResponse(404, res, message);
+        return;
       } else {
         message = "Loan data updated successfully";
-        handleResultDisplay(result, res, message);
+        resp.successResponse(200, res, result, message);
+        return;
       }
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   updateLoanStatus: async (req, res) => {
     const { id } = req.params;
     const { loan_status } = req.body;
 
-    let loan_statuses = [
-      "accepted",
-      "pending",
-      "reviewing",
-      "rejected",
-      "disbursed",
-    ];
-
-    //check if the sent loan status match any of the available loan status
-    let isLoanStatusAvailable = loan_statuses.some((item) => {
-      return item === loan_status;
-    });
-
-    if (!isLoanStatusAvailable) {
-      message = "Selected status is not valid";
-      handle400(res, message);
-    }
-
-    if (!loan_status) {
-      message = "Select a loan status";
-      handle400(res, message);
-    }
+    validations.validateLoanStatus(loan_status, res);
 
     try {
       let result = await Loan.findByIdAndUpdate(id, req.body, {
@@ -216,15 +176,16 @@ let admin = {
       }).exec();
       if (!result) {
         message = `Loan with id ${id} not found`;
-        handle404(res, message);
+        resp.failedResponse(404, res, message);
         return;
       } else {
         message = "Loan data updated successfully";
-        handleResultDisplay(result, res, message);
+        resp.successResponse(200, res, result, message);
         return;
       }
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
+      return;
     }
   },
 };
