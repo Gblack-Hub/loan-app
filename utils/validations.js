@@ -79,7 +79,7 @@ const validations = {
       return resp.failedResponse(400, res, message);
     }
     if (!req.body) {
-      message = "All field is required";
+      message = "All field are required";
       return resp.failedResponse(400, res, message);
     }
   },

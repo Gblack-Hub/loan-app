@@ -30,6 +30,9 @@ const auth_admin_checker = async (req, res, next) => {
         req.user = result;
         req.token = token;
         next();
+      } else {
+        message = "Authorization error";
+        return resp.failedResponse(401, res, message);
       }
     } else {
       message = "You cannot access this page";

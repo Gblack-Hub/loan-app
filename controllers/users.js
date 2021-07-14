@@ -53,28 +53,21 @@ let users = {
   login: async (req, res) => {
     const { email, password } = req.body;
 
-    validations.validateUserLogin(req);
+    validations.validateUserLogin(req, res);
 
     try {
-      if (!req.body) {
-        message = "All field is required";
-        handle400(res, message);
-      }
-
       //check if email exists
       const user = await User.findOne({ email });
       if (!user) {
         message = `Email '${email}' is not registered`;
-        resp.failedResponse(404, res, message);
-        return;
+        return resp.failedResponse(404, res, message);
       }
 
       //check if password matches the provided one
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {
         message = "Provided password does not match";
-        resp.failedResponse(400, res, message);
-        return;
+        return resp.failedResponse(400, res, message);
       }
 
       // Create token if credentials are correct
@@ -87,9 +80,9 @@ let users = {
       const result = await User.findOne({ email }, { password: 0 });
 
       let message = "Signed In successfully";
-      resp.authResponse(200, res, result, message, token);
+      return resp.authResponse(200, res, result, message, token);
     } catch (err) {
-      resp.failedResponse(500, res, err);
+      return resp.failedResponse(500, res, err);
     }
   },
 

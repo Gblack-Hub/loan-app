@@ -13,8 +13,7 @@ const resp = {
       data: result,
       authorization: token,
     };
-    res.status(code).send(response);
-    return;
+    return res.status(code).send(response);
   },
 
   successResponse: (code, res, result, message) => {
@@ -23,8 +22,7 @@ const resp = {
       message: message,
       data: result,
     };
-    res.status(code).send(response);
-    return;
+    return res.status(code).send(response);
   },
 
   failedResponse: (code, res, message) => {
@@ -33,8 +31,7 @@ const resp = {
       message: message,
       data: null,
     };
-    res.status(code).send(response);
-    return;
+    return res.status(code).send(response);
   },
 
   errorResponse: (code, res, err) => {
@@ -51,8 +48,7 @@ const resp = {
       error: true,
       message: `Method ${methodUsed} is not allowed`,
     };
-    res.status(405).send(response);
-    return;
+    return res.status(405).send(response);
   },
 };
 

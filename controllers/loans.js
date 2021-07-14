@@ -1,5 +1,6 @@
 "use strict";
 const Loan = require("../models/loan");
+const User = require("../models/user"); //used to validate the existence of owner_email while requesting for a loan
 const resp = require("../utils/api-response");
 const validations = require("../utils/validations");
 
@@ -7,15 +8,22 @@ let message;
 
 let loans = {
   addLoan: async (req, res) => {
-    let { amount_requested, owner, email } = req.body;
+    let { amount_requested, owner_email } = req.body;
+    let { email } = req.user;
 
     validations.validateAddLoan(req, res);
 
     try {
+      const isOwnerExist = await User.findOne({ email: owner_email }).exec();
+      if (!isOwnerExist) {
+        message = `No user with the email ${email} found`;
+        return resp.failedResponse(404, res, message);
+      }
+
       let loanData = new Loan({
         amount_requested,
-        owner,
-        email,
+        owner_email,
+        initiator: email,
       });
 
       const result = await loanData.save();
@@ -26,6 +34,7 @@ let loans = {
       resp.errorResponse(500, res, err);
     }
   },
+
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
@@ -41,6 +50,7 @@ let loans = {
       return resp.errorResponse(500, res, err);
     }
   },
+
   getOneLoan: async (req, res) => {
     const { id } = req.params;
     try {
@@ -55,6 +65,7 @@ let loans = {
       resp.errorResponse(500, res, err);
     }
   },
+
   updateLoan: async (req, res) => {
     const { id } = req.params;
     if (!req.body) {
@@ -79,6 +90,7 @@ let loans = {
       resp.errorResponse(500, res, err);
     }
   },
+
   updateLoanStatus: async (req, res) => {
     const { id } = req.params;
     const { loan_status } = req.body;

@@ -12,9 +12,8 @@ let admin = {
     const { username, email, password } = req.body;
 
     validations.validateAdminRegistration(req, res);
-    
-    try {
 
+    try {
       const existingUser = await Admin.findOne({ email });
       if (existingUser) {
         message = `Email is already registered`;
@@ -24,8 +23,7 @@ let admin = {
       let existingUsername = await Admin.findOne({ username });
       if (existingUsername) {
         message = `Username already taken.`;
-        resp.failedResponse(409, res, message);
-        return;
+        return resp.failedResponse(409, res, message);
       }
 
       //Encrypt user password before saving to database
@@ -44,30 +42,29 @@ let admin = {
       const result = await Admin.findOne({ email }, { password: 0 });
 
       message = "Registration successful";
-      resp.authResponse(200, res, result, message, token);
+      return resp.authResponse(200, res, result, message, token);
     } catch (err) {
       resp.errorResponse(500, res, err);
     }
   },
+
   login: async (req, res) => {
     const { email, password } = req.body;
 
-    validations.validateAdminLogin(req);
+    validations.validateAdminLogin(req, res);
 
     try {
       //check if email exists
       const user = await Admin.findOne({ email });
       if (!user) {
-        message = `Email '${email}' is not registered`;
-        resp.failedResponse(404, res, message);
-        return;
+        message = `Email '${email}' is not registered or is not an admin`;
+        return resp.failedResponse(404, res, message);
       }
       //check if password matches the provided one
       const isPasswordMatch = await bcrypt.compare(password, user.password);
       if (!isPasswordMatch) {
         message = "Provided password does not match";
-        resp.failedResponse(400, res, message);
-        return;
+        return resp.failedResponse(400, res, message);
       }
 
       // Create token if credentials are correct
@@ -81,7 +78,7 @@ let admin = {
       const result = await Admin.findOne({ email }, { password: 0 });
 
       message = "Signed In successfully";
-      resp.authResponse(200, res, result, message, token);
+      return resp.authResponse(200, res, result, message, token);
     } catch (err) {
       resp.failedResponse(500, res, err);
     }

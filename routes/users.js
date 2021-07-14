@@ -12,5 +12,6 @@ router.post("/login", users.login);
 router.post("/loan/create", auth_user_checker, users.addLoan);
 router.get("/loans", auth_user_checker, users.getLoans);
 router.get("/loan/:id", auth_user_checker, users.getOneLoan);
+router.get("/loan/repay/:id", auth_user_checker, users.repayLoan);
 
 module.exports = router;
