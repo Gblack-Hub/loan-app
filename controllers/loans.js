@@ -2,7 +2,6 @@
 const Loan = require("../models/loan");
 const resp = require("../utils/api-response");
 const validations = require("../utils/validations");
-const paystack = require("../utils/paystack");
 
 let message;
 
@@ -45,9 +44,6 @@ let loans = {
   getOneLoan: async (req, res) => {
     const { id } = req.params;
     try {
-      // if(typeof req.header('Authorization') !== undefined){  //check if bearer is undefined
-      // const token = req.header('Authorization').replace('Bearer ', '')
-      // const user = jwt.verify(token, process.env.JWT_KEY)
       const result = await Loan.findById(id).exec();
       if (!result) {
         message = `Loan with id ${id} is not found`;
@@ -55,9 +51,6 @@ let loans = {
       }
       message = "Loan data fetched successfully";
       resp.successResponse(200, res, result, message);
-      // } else {
-      // 	response.sendStatus(403); //forbidden
-      // }
     } catch (err) {
       resp.errorResponse(500, res, err);
     }
@@ -108,39 +101,6 @@ let loans = {
     } catch (err) {
       resp.errorResponse(500, res, err);
       return;
-    }
-  },
-  repayLoan: async (req, res) => {
-    const { id } = req.params;
-    const { reference } = req.body.response;
-
-    validations.validateLoanRepayment(req, res);
-
-    try {
-      const findLoan = await Loan.findById(id).exec();
-      validations.validateLoanRequirements(findLoan, res);
-
-      // confirm from paystack if the initiated transaction (payment) is valid
-      const isPaymentValid = await paystack.checkPaymentFromPaystack(findLoan.amount_requested, reference, res);
-
-      //update record in the database if payment is valid
-      if (isPaymentValid) {
-        const result = await Loan.findByIdAndUpdate(
-          id,
-          { isRepaid: true },
-          {
-            useFindAndModify: false,
-          }
-        ).exec();
-
-        message = "Loan repayment was successful.";
-        return resp.successResponse(200, res, result, message);
-      } else {
-        message = "Loan repayment was not successful.";
-        return resp.failedResponse(422, res, result, message);
-      }
-    } catch (err) {
-      return resp.errorResponse(500, res, err);
     }
   },
 };

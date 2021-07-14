@@ -1,6 +1,5 @@
 const axios = require("axios");
 
-
 //paystack verification config
 let config = (reference) => {
   return {
@@ -13,33 +12,33 @@ let config = (reference) => {
 };
 
 const paystack = {
-    checkPaymentFromPaystack: async (amount_requested, reference, res) => {
+  checkPaymentFromPaystack: async (amount_requested, reference, res) => {
     return await axios(config(reference))
-        .then((res) => {
+      .then((res) => {
         if (res.data && res.data.data) {
-            let data = res.data.data;
-            if (data.status == "success") {
+          let data = res.data.data;
+          if (data.status == "success") {
             if (data.amount / 100 === amount_requested) {
-                return true;
+              return true;
             }
             throw {
-                message: "Invalid amount paid.",
+              message: "Invalid amount paid.",
             };
-            }
-            throw { message: "Payment Transaction was not successful" };
+          }
+          throw { message: "Payment Transaction was not successful" };
         }
         throw { message: "Payment Transaction was not successful" };
-        })
-        .catch((err) => {
+      })
+      .catch((err) => {
         let response = {
-            error: true,
-            message: err.message ? err.message : "Invalid Payment Reference",
-            data: null,
+          error: true,
+          message: err.message ? err.message : "Invalid Payment Reference",
+          data: null,
         };
         res.status(500).send(response);
-            return;
-        });
-    }
-}
+        return;
+      });
+  },
+};
 
 module.exports = paystack;

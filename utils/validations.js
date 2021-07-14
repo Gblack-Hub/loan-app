@@ -39,13 +39,8 @@ const validations = {
   },
 
   validateAddLoan: (req, res) => {
-    let { amount_requested, email } = req.body;
+    let { amount_requested } = req.body;
 
-    if (!email) {
-      message = "An email is required";
-      return resp.failedResponse(400, res, message);
-    }
-    
     if (!amount_requested || amount_requested < 1000) {
       message = "Loan amount cannot be empty or less than N1,000";
       return resp.failedResponse(400, res, message);
@@ -123,7 +118,7 @@ const validations = {
       return resp.failedResponse(400, res, message);
     }
   },
-  
+
   validateLoanRequirements: (findLoan, res) => {
     if (!findLoan) {
       message = `Loan with id ${id} not found`;
@@ -137,7 +132,7 @@ const validations = {
       message = "Loan is already cleared.";
       return resp.failedResponse(404, res, message);
     }
-  }
+  },
 };
 
 module.exports = validations;

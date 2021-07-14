@@ -4,10 +4,12 @@ const express = require("express");
 const router = express.Router();
 const loans = require("../controllers/loans");
 
+//middlewares
+const auth_admin_checker = require("../middlewares/auth_admin_checker");
+
 router.post("/create", loans.addLoan);
-router.get("/loans", loans.getLoans);
-router.get("/:id", loans.getOneLoan);
-router.put("/update/:id", loans.updateLoanStatus);
-router.post("/repay/:id", loans.repayLoan);
+router.get("/loans", auth_admin_checker, loans.getLoans);
+router.get("/:id", auth_admin_checker, loans.getOneLoan);
+router.put("/update/:id", auth_admin_checker, loans.updateLoanStatus);
 
 module.exports = router;
