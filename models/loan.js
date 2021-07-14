@@ -20,7 +20,7 @@ const loan_schema = new Mongoose.Schema(
       },
     },
     amount_paid: { type: Number, default: 0, required: true },
-    amount_remaining: { type: Number, default: 0, required: true },
+    amount_remaining: { type: Number, required: true },
     next_payment_date: { type: Date, default: nextOneMonth, required: true },
     isRepaid: { type: Boolean, default: false, required: true },
     initiator: { type: String, required: true },

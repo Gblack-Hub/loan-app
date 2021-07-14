@@ -18,11 +18,11 @@ const paystack = {
         if (res.data && res.data.data) {
           let data = res.data.data;
           if (data.status == "success") {
-            if (data.amount / 100 === amount_requested) {
+            if (data.amount / 100 <= amount_requested) {
               return true;
             }
             throw {
-              message: "Invalid amount sent.",
+              message: "Invalid payment amount.",
             };
           }
           throw { message: "Payment Transaction was not successful" };

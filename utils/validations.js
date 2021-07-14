@@ -121,23 +121,35 @@ const validations = {
     }
   },
 
-  validateLoanRequirements: (findLoan, res) => {
+  validateLoanRequirements: (findLoan, amount, res) => {
+    const { loan_status, amount_remaining, isRepaid } = findLoan;
+
     if (!findLoan) {
       message = `Loan with id ${id} not found`;
-      return resp.failedResponse(404, res, message);
+      resp.failedResponse(404, res, message);
+      return true;
     }
-    if (findLoan.loan_status !== "disbursed") {
+    if (loan_status !== "disbursed") {
       message = "Only disbursed loans can be repaid.";
-      return resp.failedResponse(422, res, message);
+      resp.failedResponse(422, res, message);
+      return true;
     }
-    if (findLoan.loan_status !== "disbursed") {
-      message = "Only disbursed loans can be repaid.";
-      return resp.failedResponse(422, res, message);
+    if (amount < 100) {
+      message = "This amount is not allowed for payment";
+      resp.failedResponse(422, res, message);
+      return true;
     }
-    if (findLoan.isRepaid) {
+    if (amount > amount_remaining) {
+      message = "You cannot pay more than you owe";
+      resp.failedResponse(422, res, message);
+      return true;
+    }
+    if (isRepaid) {
       message = "Loan was already cleared.";
-      return resp.failedResponse(422, res, message);
+      resp.failedResponse(422, res, message);
+      return true;
     }
+    return false;
   },
 };
 

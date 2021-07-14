@@ -22,6 +22,7 @@ let loans = {
 
       let loanData = new Loan({
         amount_requested,
+        amount_remaining: amount_requested,
         owner_email,
         initiator: email,
       });

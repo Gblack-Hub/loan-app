@@ -95,6 +95,7 @@ let users = {
     try {
       let loanData = new Loan({
         amount_requested,
+        amount_remaining: amount_requested,
         owner_email: email,
         initiator: email,
       });
@@ -151,33 +152,47 @@ let users = {
       const findLoan = await Loan.findById(id).exec();
 
       if (findLoan) {
-        validations.validateLoanRequirements(findLoan, res);
+        let isAnyError = validations.validateLoanRequirements(
+          findLoan,
+          amount,
+          res
+        );
+
+        if (isAnyError) {
+          message = "Payment Error, contact customer care";
+          return resp.failedResponse(422, res, message);
+        }
       } else {
         message = "This loan does not exist.";
-        resp.failedResponse(404, res, message);
+        return resp.failedResponse(404, res, message);
       }
+      const { amount_requested, amount_paid } = findLoan;
 
       // confirm from paystack if the initiated transaction (payment) is valid
       const isPaymentValid = await paystack.checkPaymentFromPaystack(
-        findLoan.amount_requested,
+        amount_requested,
         reference,
         res
       );
 
+      let updatedPaidAmount = Number(amount_paid) + Number(amount); //add existing payment with new payment to make it the updatedPaidAmount
+      let amountRemaining =
+        Number(amount_requested) - Number(updatedPaidAmount); //add existing payment with new payment (updatedPaidAmount) and subtract from amount_remaining
+      let isRepaid =
+        Number(updatedPaidAmount) === Number(amount_requested) ? true : false;
+
       //update record in the database if payment is valid
-      findLoan.amount_requested - findLoan.amount_paid;
       if (isPaymentValid) {
         let dataToUpdate = {
-          isRepaid: true,
-          amount_paid: amount,
-          amount_remaining:
-            findLoan.amount_requested - (findLoan.amount_paid + amount),
+          isRepaid,
+          amount_paid: updatedPaidAmount,
+          amount_remaining: amountRemaining,
         };
         const result = await Loan.findByIdAndUpdate(id, dataToUpdate, {
           useFindAndModify: false,
         }).exec();
 
-        message = "Loan repayment was successful.";
+        message = `Loan repayment of ${amount.toLocaleString()} was successful.`;
         return resp.successResponse(200, res, result, message);
       } else {
         message = "Loan repayment was not successful.";
