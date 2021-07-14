@@ -1,60 +1,45 @@
 "use strict";
 const Loan = require("../models/loan");
-// const jwt = require('jsonwebtoken')
+const resp = require("../utils/api-response");
+const validations = require("../utils/validations");
+const paystack = require("../utils/paystack");
 
-let response = {
-  error: null,
-  message: null,
-  data: null,
-};
-
-let handleResultDisplay = (result, res, message) => {
-  response = {
-    error: false,
-    message: message,
-    data: result,
-  };
-  res.status(200).send(response);
-};
-let handleError = (err, res) => {
-  response = {
-    error: true,
-    message: err.message,
-    data: null,
-  };
-  res.status(500).send(response);
-};
+let message;
 
 let loans = {
   addLoan: async (req, res) => {
-    if (!req.body.amount_requested || req.body.amount_requested < 1000) {
-      res.status(400).send({
-        message: "Loan amount cannot be empty or less than &#8358;1,000",
-      });
-      return;
-    }
+    let { amount_requested, owner, email } = req.body;
+
+    validations.validateAddLoan(req, res);
 
     try {
-      let { amount_requested, owner } = req.body;
       let loanData = new Loan({
         amount_requested,
         owner,
+        email,
       });
 
       const result = await loanData.save();
-      let message = "Loan request created successfully";
-      handleResultDisplay(result, res, message);
+
+      message = "Loan request created successfully";
+      resp.successResponse(200, res, result, message);
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
     }
   },
   getLoans: async (req, res) => {
     try {
       const result = await Loan.find({}).exec();
-      let message = "All loan records available";
-      handleResultDisplay(result, res, message);
+
+      if (result.length <= 0) {
+        message = "Loans Not found";
+        return resp.successResponse(200, res, result, message);
+      }
+
+      message = "Successful";
+      return resp.successResponse(200, res, result, message);
     } catch (err) {
-      handleError(err, res);
+      return resp.errorResponse(500, res, err);
     }
   },
   getOneLoan: async (req, res) => {
@@ -64,13 +49,98 @@ let loans = {
       // const token = req.header('Authorization').replace('Bearer ', '')
       // const user = jwt.verify(token, process.env.JWT_KEY)
       const result = await Loan.findById(id).exec();
-      let message = "Loan data fetched successfully";
-      handleResultDisplay(result, res, message);
+      if (!result) {
+        message = `Loan with id ${id} is not found`;
+        return resp.failedResponse(404, res, message);
+      }
+      message = "Loan data fetched successfully";
+      resp.successResponse(200, res, result, message);
       // } else {
       // 	response.sendStatus(403); //forbidden
       // }
     } catch (err) {
-      handleError(err, res);
+      resp.errorResponse(500, res, err);
+    }
+  },
+  updateLoan: async (req, res) => {
+    const { id } = req.params;
+    if (!req.body) {
+      message = "No data provided, please provide data";
+      resp.failedResponse(400, res, message);
+    }
+
+    try {
+      let result = await Loan.findByIdAndUpdate(id, req.body, {
+        useFindAndModify: false,
+      }).exec();
+      if (!result) {
+        message = `Loan with id ${id} not found`;
+        resp.failedResponse(404, res, message);
+        return;
+      } else {
+        message = "Loan data updated successfully";
+        resp.successResponse(200, res, result, message);
+        return;
+      }
+    } catch (err) {
+      resp.errorResponse(500, res, err);
+    }
+  },
+  updateLoanStatus: async (req, res) => {
+    const { id } = req.params;
+    const { loan_status } = req.body;
+
+    validations.validateLoanStatus(loan_status, res);
+
+    try {
+      let result = await Loan.findByIdAndUpdate(id, req.body, {
+        useFindAndModify: false,
+      }).exec();
+      if (!result) {
+        message = `Loan with id ${id} not found`;
+        resp.failedResponse(404, res, message);
+        return;
+      } else {
+        message = "Loan data updated successfully";
+        resp.successResponse(200, res, result, message);
+        return;
+      }
+    } catch (err) {
+      resp.errorResponse(500, res, err);
+      return;
+    }
+  },
+  repayLoan: async (req, res) => {
+    const { id } = req.params;
+    const { reference } = req.body.response;
+
+    validations.validateLoanRepayment(req, res);
+
+    try {
+      const findLoan = await Loan.findById(id).exec();
+      validations.validateLoanRequirements(findLoan, res);
+
+      // confirm from paystack if the initiated transaction (payment) is valid
+      const isPaymentValid = await paystack.checkPaymentFromPaystack(findLoan.amount_requested, reference, res);
+
+      //update record in the database if payment is valid
+      if (isPaymentValid) {
+        const result = await Loan.findByIdAndUpdate(
+          id,
+          { isRepaid: true },
+          {
+            useFindAndModify: false,
+          }
+        ).exec();
+
+        message = "Loan repayment was successful.";
+        return resp.successResponse(200, res, result, message);
+      } else {
+        message = "Loan repayment was not successful.";
+        return resp.failedResponse(422, res, result, message);
+      }
+    } catch (err) {
+      return resp.errorResponse(500, res, err);
     }
   },
 };

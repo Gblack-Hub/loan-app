@@ -1,3 +1,4 @@
+
 let response = {
   error: null,
   message: null,
@@ -42,8 +43,7 @@ const resp = {
       message: err.message,
       data: null,
     };
-    res.status(code).send(response);
-    return;
+    return res.status(code).send(response);
   },
 
   incorrectRequestMethod: (methodUsed) => {
