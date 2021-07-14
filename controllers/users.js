@@ -148,7 +148,13 @@ let users = {
 
     try {
       const findLoan = await Loan.findById(id).exec();
-      validations.validateLoanRequirements(findLoan, res);
+
+      if (!findLoan) {
+        message = "This loan does not exist.";
+        resp.failedResponse(404, res, message);
+      } else {
+        validations.validateLoanRequirements(findLoan, res);
+      }
 
       // confirm from paystack if the initiated transaction (payment) is valid
       const isPaymentValid = await paystack.checkPaymentFromPaystack(

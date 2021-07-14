@@ -8,6 +8,10 @@ Clone this repository and run the command below to install all dependencies
 npm install
 ```
 
+# NOTE
+
+To make repayment, load the `views/index.html` page on port 9999 e.g `http://localhost:8888/loan-app/views/index.html` or change the port to your environment port.
+
 ### Admin Registration
 
 **URL** : `/api/admin/register`

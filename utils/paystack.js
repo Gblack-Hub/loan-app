@@ -22,7 +22,7 @@ const paystack = {
               return true;
             }
             throw {
-              message: "Invalid amount paid.",
+              message: "Invalid amount sent.",
             };
           }
           throw { message: "Payment Transaction was not successful" };

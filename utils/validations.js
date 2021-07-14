@@ -1,5 +1,7 @@
 const resp = require("./api-response");
 
+let message;
+
 const validations = {
   validateAdminRegistration: (req, res) => {
     const { username, email, password } = req.body;
@@ -126,11 +128,11 @@ const validations = {
     }
     if (findLoan.loan_status !== "disbursed") {
       message = "Only disbursed loans can be repaid.";
-      return resp.failedResponse(404, res, message);
+      return resp.failedResponse(422, res, message);
     }
     if (findLoan.isRepaid) {
-      message = "Loan is already cleared.";
-      return resp.failedResponse(404, res, message);
+      message = "Loan was already cleared.";
+      return resp.failedResponse(422, res, message);
     }
   },
 };
