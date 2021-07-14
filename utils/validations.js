@@ -130,6 +130,10 @@ const validations = {
       message = "Only disbursed loans can be repaid.";
       return resp.failedResponse(422, res, message);
     }
+    if (findLoan.loan_status !== "disbursed") {
+      message = "Only disbursed loans can be repaid.";
+      return resp.failedResponse(422, res, message);
+    }
     if (findLoan.isRepaid) {
       message = "Loan was already cleared.";
       return resp.failedResponse(422, res, message);

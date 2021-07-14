@@ -9,54 +9,53 @@
 </head>
 
 <body>
-        <main class="container">
-            <div class="row">
-                <div class="col-sm-12 col-md-3 col-lg-4 col-xl-4"></div>
-                <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
-                    <h4 class="text-center my-3">Repayment</h4>
-                    <div class="card-body shadow">
-                        <div class="form-group">
-                            <label>Loan Id</label>
-                            <input type="text" class="form-control" value="60eee9e07d54a5c75d7c1618" id="loan_id" />
-                        </div>
-                        <div class="form-group">
-                            <label>Email</label>
-                            <input type="email" class="form-control" value="user@mail.com" id="email" />
-                        </div>
-                        <div class="form-group">
-                            <label>Amount</label>
-                            <input type="number" class="form-control" value="200000" id="amount" />
-                        </div>
-                        <div class="form-group">
-                            <label>Header Auth</label>
-                            <input type="text" class="form-control" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGVlZTY0OWZiMzZjZGMwMWNhNTY0ZDEiLCJpYXQiOjE2MjYyNzg5MDEsImV4cCI6MTYyNjM2NTMwMX0.GZdnsP0pMnoZkNxZOt-mm4myIigQFxi85IL9n5FkoQg" id="token" />
-                        </div>
-                        <div class="text-center mb-3" id="feedback"></div>
-                        <button class="btn btn-dark btn-block" onclick="payWithPaystack()">Repay with Paystack</button>
+    <main class="container">
+        <div class="row">
+            <div class="col-sm-12 col-md-3 col-lg-4 col-xl-4"></div>
+            <div class="col-sm-12 col-md-6 col-lg-4 col-xl-4">
+                <h4 class="text-center my-3">Repayment</h4>
+                <div class="card-body shadow">
+                    <div class="form-group">
+                        <label>Loan Id</label>
+                        <input type="text" class="form-control" value="60eee9e07d54a5c75d7c1618" id="loan_id" />
                     </div>
-
+                    <div class="form-group">
+                        <label>Email</label>
+                        <input type="email" class="form-control" value="user@mail.com" id="email" />
+                    </div>
+                    <div class="form-group">
+                        <label>Amount</label>
+                        <input type="number" class="form-control" value="200000" id="amount" />
+                    </div>
+                    <div class="form-group">
+                        <label>Auth Token</label>
+                        <input type="text" class="form-control" value="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJfaWQiOiI2MGVlZTY0OWZiMzZjZGMwMWNhNTY0ZDEiLCJpYXQiOjE2MjYyNzg5MDEsImV4cCI6MTYyNjM2NTMwMX0.GZdnsP0pMnoZkNxZOt-mm4myIigQFxi85IL9n5FkoQg" id="token" />
+                    </div>
+                    <div class="text-center mb-3" id="feedback"></div>
+                    <button class="btn btn-dark btn-block" onclick="payWithPaystack()">Repay with Paystack</button>
                 </div>
-                <div class="col-sm-12 col-md-3 col-lg-4 col-xl-4"></div>
             </div>
+            <div class="col-sm-12 col-md-3 col-lg-4 col-xl-4"></div>
+        </div>
+    </main>
 
-        </main>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"
+        integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
 
-        <script src="https://code.jquery.com/jquery-3.6.0.min.js"
-            integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
-
-        <script src="https://js.paystack.co/v1/inline.js"></script>
-        <script type="text/javascript">
-            const initId = document.getElementById("loan_id");
-            const initEmail = document.getElementById("email");
-            const initAmount = document.getElementById("amount");
-            const token = document.getElementById("token");
+    <script src="https://js.paystack.co/v1/inline.js"></script>
+    <script type="text/javascript">
+        const initId = document.getElementById("loan_id");
+        const initEmail = document.getElementById("email");
+        const initAmount = document.getElementById("amount");
+        const token = document.getElementById("token");
+        
+        function payWithPaystack() {
+            let id = initId.value;
+            let email = initEmail.value;
+            let amount = initAmount.value;
+            let public_key = 'pk_test_adad5f3b58dd7cb203ade1171c55d5a33c8012cc';
             
-            function payWithPaystack() {
-                let id = initId.value;
-                let email = initEmail.value;
-                let amount = initAmount.value;
-                
-                let public_key = 'pk_test_adad5f3b58dd7cb203ade1171c55d5a33c8012cc';
+            if(id !== "" && email !== "" && amount !== ""){
                 var handler = PaystackPop.setup({
                     key: public_key,
                     email: email,
@@ -70,30 +69,33 @@
                     }
                 });
                 handler.openIframe();
+            } else {
+                return document.getElementById("feedback").innerHTML = `<div class="alert alert-warning">Fields cannot be empty</div>`;
             }
-            function repayLoan(id, email, amount, response) {
-                $.ajax({
-                    url: `http://localhost:9000/api/user/loan/repay/${id}`,
-                    method: "PUT",
-                    data: JSON.stringify({ email: email, amount: amount, response: response }),
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'Authorization': `Bearer ${token.value}`
-                    },
-                    success: function (res) {
-                        if (res.error) {
-                            return document.getElementById("feedback").innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
-                        } else {
-                            return document.getElementById("feedback").innerHTML = `<div class="alert alert-success">${res.message}</div>`
-                        }
-                    },
-                    error: function (err) {
-                        console.log(err)
-                        return document.getElementById("feedback").innerHTML = `<div class="alert alert-danger">${err.responseJSON.message}</div>`;
+        }
+        function repayLoan(id, email, amount, response) {
+            $.ajax({
+                url: `http://localhost:9000/api/user/loan/repay/${id}`,
+                method: "PUT",
+                data: JSON.stringify({ email: email, amount: amount, response: response }),
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${token.value}`
+                },
+                success: function (res) {
+                    if (res.error) {
+                        return document.getElementById("feedback").innerHTML = `<div class="alert alert-danger">${res.message}</div>`;
+                    } else {
+                        return document.getElementById("feedback").innerHTML = `<div class="alert alert-success">${res.message}</div>`
                     }
-                });
-            }
-        </script>
+                },
+                error: function (err) {
+                    console.log(err)
+                    return document.getElementById("feedback").innerHTML = `<div class="alert alert-danger">${err.responseJSON.message}</div>`;
+                }
+            });
+        }
+    </script>
 </body>
 
 </html>

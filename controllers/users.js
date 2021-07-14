@@ -142,6 +142,7 @@ let users = {
 
   repayLoan: async (req, res) => {
     const { id } = req.params;
+    const { amount } = req.body;
     const { reference } = req.body.response;
 
     validations.validateLoanRepayment(req, res);
@@ -149,11 +150,11 @@ let users = {
     try {
       const findLoan = await Loan.findById(id).exec();
 
-      if (!findLoan) {
+      if (findLoan) {
+        validations.validateLoanRequirements(findLoan, res);
+      } else {
         message = "This loan does not exist.";
         resp.failedResponse(404, res, message);
-      } else {
-        validations.validateLoanRequirements(findLoan, res);
       }
 
       // confirm from paystack if the initiated transaction (payment) is valid
@@ -164,14 +165,17 @@ let users = {
       );
 
       //update record in the database if payment is valid
+      findLoan.amount_requested - findLoan.amount_paid;
       if (isPaymentValid) {
-        const result = await Loan.findByIdAndUpdate(
-          id,
-          { isRepaid: true },
-          {
-            useFindAndModify: false,
-          }
-        ).exec();
+        let dataToUpdate = {
+          isRepaid: true,
+          amount_paid: amount,
+          amount_remaining:
+            findLoan.amount_requested - (findLoan.amount_paid + amount),
+        };
+        const result = await Loan.findByIdAndUpdate(id, dataToUpdate, {
+          useFindAndModify: false,
+        }).exec();
 
         message = "Loan repayment was successful.";
         return resp.successResponse(200, res, result, message);
