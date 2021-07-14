@@ -177,7 +177,7 @@ let users = {
 
       let updatedPaidAmount = Number(amount_paid) + Number(amount); //add existing payment with new payment to make it the updatedPaidAmount
       let amountRemaining =
-        Number(amount_requested) - Number(updatedPaidAmount); //add existing payment with new payment (updatedPaidAmount) and subtract from amount_remaining
+        Number(amount_requested) - Number(updatedPaidAmount); //remove the updatedPaidAmount from the original loan amount to make it the new balance to be paid
       let isRepaid =
         Number(updatedPaidAmount) === Number(amount_requested) ? true : false;
 
