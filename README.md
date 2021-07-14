@@ -2,11 +2,13 @@
 
 ## Project Setup
 
-Clone this repository and run the command below to install all dependencies
+1.  Clone this repository and run the command below to install all dependencies
 
 ```
 npm install
 ```
+
+2. Install MongoDB
 
 # NOTE
 
