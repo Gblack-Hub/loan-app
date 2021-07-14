@@ -137,3 +137,15 @@ To make repayment, load the `views/index.html` page on port 8888 e.g `http://loc
 **Success message** :`Loan data updated successfully`
 
 **Auth required** : YES
+
+### Repay Loan (User)
+
+**URL** : `/api/user/loan/repay/:id`
+
+**Method** : `PUT`
+
+**Body** : `{ email: String, amount: Number, response: Object (containing paystack response) }`
+
+**Success message** :`Loan repayment of (amount) was successful.
+
+**Auth required** : YES
