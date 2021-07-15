@@ -132,25 +132,21 @@ const validations = {
     }
     if (loan_status !== "disbursed") {
       message = "Only disbursed loans can be repaid.";
-      console.log("disbursed");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (amount < 100) {
       message = "This amount is not allowed for payment";
-      console.log("not allowed");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (amount > amount_remaining) {
       message = "You cannot pay more than you owe";
-      console.log("cannpt pay more");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (isRepaid) {
       message = "Loan was already cleared.";
-      console.log("already cleared");
       resp.failedResponse(422, res, message);
       return true;
     }
