@@ -9,6 +9,7 @@ let nextOneMonth = new Date(currentDate.setMonth(currentDate.getMonth() + 1));
 const loan_schema = new Mongoose.Schema(
   {
     amount_requested: { type: Number, required: true },
+    owner_id: { type: String, required: true },
     owner_email: {
       type: String,
       required: true,

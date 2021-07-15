@@ -30,9 +30,9 @@ let loans = {
       const result = await loanData.save();
 
       message = "Loan request created successfully";
-      resp.successResponse(200, res, result, message);
+      return resp.successResponse(200, res, result, message);
     } catch (err) {
-      resp.errorResponse(500, res, err);
+      return resp.errorResponse(500, res, err);
     }
   },
 
@@ -61,9 +61,9 @@ let loans = {
         return resp.failedResponse(404, res, message);
       }
       message = "Loan data fetched successfully";
-      resp.successResponse(200, res, result, message);
+      return resp.successResponse(200, res, result, message);
     } catch (err) {
-      resp.errorResponse(500, res, err);
+      return resp.errorResponse(500, res, err);
     }
   },
 
@@ -71,7 +71,7 @@ let loans = {
     const { id } = req.params;
     if (!req.body) {
       message = "No data provided, please provide data";
-      resp.failedResponse(400, res, message);
+      return resp.failedResponse(400, res, message);
     }
 
     try {
@@ -80,15 +80,13 @@ let loans = {
       }).exec();
       if (!result) {
         message = `Loan with id ${id} not found`;
-        resp.failedResponse(404, res, message);
-        return;
+        return resp.failedResponse(404, res, message);
       } else {
         message = "Loan data updated successfully";
-        resp.successResponse(200, res, result, message);
-        return;
+        return resp.successResponse(200, res, result, message);
       }
     } catch (err) {
-      resp.errorResponse(500, res, err);
+      return resp.errorResponse(500, res, err);
     }
   },
 
@@ -104,16 +102,13 @@ let loans = {
       }).exec();
       if (!result) {
         message = `Loan with id ${id} not found`;
-        resp.failedResponse(404, res, message);
-        return;
+        return resp.failedResponse(404, res, message);
       } else {
         message = "Loan data updated successfully";
-        resp.successResponse(200, res, result, message);
-        return;
+        return resp.successResponse(200, res, result, message);
       }
     } catch (err) {
-      resp.errorResponse(500, res, err);
-      return;
+      return resp.errorResponse(500, res, err);
     }
   },
 };

@@ -46,7 +46,7 @@ let users = {
       message = "Registration successful";
       return resp.authResponse(200, res, result, message, token);
     } catch (err) {
-      resp.errorResponse(500, res, err);
+      return resp.errorResponse(500, res, err);
     }
   },
 
@@ -79,7 +79,7 @@ let users = {
       // send back user details excluding password
       const result = await User.findOne({ email }, { password: 0 });
 
-      let message = "Signed In successfully";
+      message = "Signed In successfully";
       return resp.authResponse(200, res, result, message, token);
     } catch (err) {
       return resp.failedResponse(500, res, err);
@@ -88,7 +88,7 @@ let users = {
 
   addLoan: async (req, res) => {
     let { amount_requested } = req.body;
-    let { email } = req.user;
+    let { email, _id } = req.user;
 
     validations.validateAddLoan(req, res);
 
@@ -97,6 +97,7 @@ let users = {
         amount_requested,
         amount_remaining: amount_requested,
         owner_email: email,
+        owner_id: _id,
         initiator: email,
       });
 

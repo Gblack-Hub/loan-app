@@ -26,6 +26,10 @@ const validations = {
   validateAdminLogin: (req, res) => {
     const { email, password } = req.body;
 
+    if (!req.body) {
+      message = "All field is required";
+      return resp.failedResponse(400, res, message);
+    }
     if (!email) {
       message = "The 'email' field is required";
       return resp.failedResponse(400, res, message);
@@ -34,15 +38,15 @@ const validations = {
       message = "The 'password' field is required";
       return resp.failedResponse(400, res, message);
     }
-    if (!req.body) {
-      message = "All field is required";
-      return resp.failedResponse(400, res, message);
-    }
   },
 
   validateAddLoan: (req, res) => {
     let { amount_requested } = req.body;
 
+    if (!req.body) {
+      message = "All field is required";
+      return resp.failedResponse(400, res, message);
+    }
     if (!amount_requested || amount_requested < 1000) {
       message = "Loan amount cannot be empty or less than N1,000";
       return resp.failedResponse(400, res, message);
@@ -72,16 +76,16 @@ const validations = {
   validateUserLogin: (req, res) => {
     const { email, password } = req.body;
 
+    if (!req.body) {
+      message = "All field are required";
+      return resp.failedResponse(400, res, message);
+    }
     if (!email) {
       message = "The 'email' field is required";
       return resp.failedResponse(400, res, message);
     }
     if (!password) {
       message = "The 'password' field is required";
-      return resp.failedResponse(400, res, message);
-    }
-    if (!req.body) {
-      message = "All field are required";
       return resp.failedResponse(400, res, message);
     }
   },
@@ -95,10 +99,10 @@ const validations = {
       "disbursed",
     ];
 
-    //check if the sent loan status match any of the available loan status
-    let isLoanStatusAvailable = loan_statuses.some((item) => {
-      return item === loan_status;
-    });
+    //check if the sent loan_status match any of the available loan status
+    let isLoanStatusAvailable = loan_statuses.some(
+      (item) => item === loan_status
+    );
 
     if (!isLoanStatusAvailable) {
       message = "Selected status is not valid";
@@ -112,9 +116,6 @@ const validations = {
   },
 
   validateLoanRepayment: (req, res) => {
-    const { id } = req.params;
-    const { reference } = req.body.response;
-
     if (!req.body) {
       message = "Loan repayment details not submitted";
       return resp.failedResponse(400, res, message);
@@ -131,21 +132,25 @@ const validations = {
     }
     if (loan_status !== "disbursed") {
       message = "Only disbursed loans can be repaid.";
+      console.log("disbursed");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (amount < 100) {
       message = "This amount is not allowed for payment";
+      console.log("not allowed");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (amount > amount_remaining) {
       message = "You cannot pay more than you owe";
+      console.log("cannpt pay more");
       resp.failedResponse(422, res, message);
       return true;
     }
     if (isRepaid) {
       message = "Loan was already cleared.";
+      console.log("already cleared");
       resp.failedResponse(422, res, message);
       return true;
     }
